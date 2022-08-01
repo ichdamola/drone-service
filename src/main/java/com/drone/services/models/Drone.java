@@ -1,11 +1,19 @@
 package com.drone.services.models;
 
+import com.drone.services.Exceptions.DroneException;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.validator.constraints.UniqueElements;
+
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 public class Drone {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -13,10 +21,9 @@ public class Drone {
     @Enumerated(EnumType.STRING)
     private Model model;
 
-    @Max(value=100, message="input number more than 100.")
+    @Column(unique=true)
     private String serialNumber;
 
-    @Max(value=500, message="weight is too much.")
     private Integer weight;
 
     private Integer batteryCapacity;
@@ -26,4 +33,15 @@ public class Drone {
 
     @OneToMany(mappedBy = "drone", cascade = CascadeType.ALL)
     private List<Medication> medications;
+
+    public Drone (Model model, String serialNumber, Integer weight, Integer batteryCapacity){
+        this.model = model;
+        this.serialNumber = serialNumber;
+        this.batteryCapacity = batteryCapacity;
+        if(weight > 500){
+            throw new DroneException("weight is too much.");
+        }
+        this.weight = weight;
+        this.state = State.IDLE;
+    }
 }
